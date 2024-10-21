@@ -170,13 +170,12 @@ double predecirSlopeOne(unsigned int userId, unsigned int itemPredict) {
 
     // Obtener ítems calificados por el usuario
     Item *itemsArray[HASH_COUNT(user->items)];
-    Item *tmpItem;
     int i = 0;
     for (Item *item = user->items; item != NULL; item = (Item*)(item->hh.next)) {
         itemsArray[i++] = item;
     }
 
-    #pragma omp parallel for reduction(+:numerador,denominador) private(tmpItem)
+    #pragma omp parallel for reduction(+:numerador,denominador)
     for (i = 0; i < HASH_COUNT(user->items); i++) {
         Item* item = itemsArray[i];
         if (item->itemId == itemPredict) continue; // Saltar si es el mismo ítem
@@ -185,7 +184,6 @@ double predecirSlopeOne(unsigned int userId, unsigned int itemPredict) {
         unsigned int count = 0;
 
         User* otherUser;
-        User* tmpUser;
 
         // Recorrer los usuarios para comparar ítems
         for (otherUser = users; otherUser != NULL; otherUser = (User*)(otherUser->hh.next)) {
@@ -201,7 +199,7 @@ double predecirSlopeOne(unsigned int userId, unsigned int itemPredict) {
                 count++;
             }
         }
-
+        //printf("%f : %f\n", deviation, item->rating);
         if (count > 0) {
             deviation /= count;  // Promediar la desviación
             numerador += (fmax(0.0, fmin(5.0, deviation + item->rating))) * count;  // Ajustar la calificación basada en la desviación
